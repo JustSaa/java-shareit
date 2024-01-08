@@ -1,6 +1,6 @@
 package ru.practicum.shareit.exeption;
 
-public class UnauthorizedException extends RuntimeException{
+public class UnauthorizedException extends RuntimeException {
     private final String message;
 
     public UnauthorizedException(String message) {
