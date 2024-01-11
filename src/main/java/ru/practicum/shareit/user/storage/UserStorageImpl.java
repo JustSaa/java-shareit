@@ -14,11 +14,10 @@ public class UserStorageImpl implements UserStorage {
     private final List<User> usersList = new ArrayList<>();
 
     @Override
-    public User create(User user) {
+    public void create(User user) {
         idUpdate();
         user.setId(userId);
         usersList.add(user);
-        return user;
     }
 
     @Override

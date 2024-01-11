@@ -10,16 +10,11 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor
-public class UserDto {
+public class UserCreateDto {
     private Integer id;
     @NotBlank(groups = Create.class, message = "Имя не должно быть пустым")
     private String name;
     @NotBlank(groups = Create.class, message = "Email не должно быть пустым")
-    @Email(groups = {Create.class, Update.class})
+    @Email(groups = Create.class)
     private String email;
-
-    public UserDto(String name, String email) {
-        this.name = name;
-        this.email = email;
-    }
 }

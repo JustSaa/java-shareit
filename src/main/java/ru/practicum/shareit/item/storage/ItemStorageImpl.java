@@ -12,11 +12,10 @@ public class ItemStorageImpl implements ItemStorage {
     private final Map<Integer, List<Item>> itemStorage = new HashMap<>();
 
     @Override
-    public Item create(Item item) {
+    public void create(Item item) {
         itemIdUpdate();
         item.setId(itemId);
         itemStorage.computeIfAbsent(item.getOwner(), k -> new ArrayList<>()).add(item);
-        return item;
     }
 
     @Override

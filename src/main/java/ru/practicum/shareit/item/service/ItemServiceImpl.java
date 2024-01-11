@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.UnauthorizedException;
+import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,10 +25,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item create(Item item, Integer userId) {
+    public ItemCreateDto create(Item item, Integer userId) {
         userExistenceCheck(userId);
         item.setOwner(userId);
-        return itemStorage.create(item);
+        itemStorage.create(item);
+        return ItemMapper.itemCreateDto(item);
     }
 
     @Override
@@ -42,11 +45,11 @@ public class ItemServiceImpl implements ItemService {
 
         userAuthorizedCheck(updatedItem, userId);
 
-        if (item.getName() != null) {
+        if (item.getName() != null && !item.getName().isEmpty()) {
             updatedItem.setName(item.getName());
         }
 
-        if (item.getDescription() != null) {
+        if (item.getDescription() != null && !item.getDescription().isEmpty()) {
             updatedItem.setDescription(item.getDescription());
         }
 

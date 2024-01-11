@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemStorage {
-    Item create(Item item);
+    void create(Item item);
 
     Item update(Item item);
 

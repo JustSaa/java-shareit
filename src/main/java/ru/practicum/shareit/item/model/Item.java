@@ -4,23 +4,21 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.user.controller.Create;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Item {
     private Integer id;
-    @NotBlank(message = "Имя не может быть пустым")
+    @NotBlank(groups = Create.class, message = "Имя не может быть пустым")
     private String name;
-    @NotBlank(message = "Описание не может быть пустым")
+    @NotBlank(groups = Create.class, message = "Описание не может быть пустым")
     private String description;
-    @NotNull(message = "Введите статус для предмета")
+    @NotNull(groups = Create.class, message = "Введите статус для предмета")
     private Boolean available;
     private Integer owner;
     private ItemRequest request;

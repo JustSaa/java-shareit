@@ -4,24 +4,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.DuplicateException;
 import ru.practicum.shareit.exeption.NotFoundException;
+import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.mapper.UserMapper;
 
 import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
-    UserStorage userStorage;
-
     @Autowired
-    public UserServiceImpl(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    private UserStorage userStorage;
 
     @Override
-    public User create(User user) {
+    public UserCreateDto create(User user) {
         validationEmail(user);
-        return userStorage.create(user);
+        userStorage.create(user);
+        return UserMapper.userCreateDto(user);
     }
 
     @Override
@@ -39,11 +38,11 @@ public class UserServiceImpl implements UserService {
     public User update(User user, Integer userId) {
         userExistenceCheck(userId);
         User userToUpdate = userStorage.findById(userId).get();
-        if (user.getEmail() != null && !user.getEmail().equals(userToUpdate.getEmail())) {
+        if (user.getEmail() != null && !user.getEmail().equals(userToUpdate.getEmail()) && !user.getEmail().isEmpty()) {
             validationEmail(user);
             userToUpdate.setEmail(user.getEmail());
         }
-        if (user.getName() != null) {
+        if (user.getName() != null && !user.getName().isEmpty()) {
             userToUpdate.setName(user.getName());
         }
         userStorage.delete(userId);
