@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +9,7 @@ import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.controller.Create;
+import ru.practicum.shareit.user.controller.PatchUpdate;
 
 import java.util.List;
 
@@ -16,18 +17,21 @@ import java.util.List;
 @RequestMapping("/items")
 @Slf4j
 @Validated
+@RequiredArgsConstructor
 public class ItemController {
-    @Autowired
-    private ItemService itemService;
+
+    private final ItemService itemService;
     private static final String SHARER_USER_ID = "X-Sharer-User-Id";
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<Item> findAllItems(@RequestHeader(SHARER_USER_ID) Integer userId) {
         log.info("Получен GET запрос к эндпоинту: '/items', Строка параметра запроса для userId: {}", userId);
         return itemService.findAllItems(userId);
     }
 
     @GetMapping("/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
     public Item getById(@RequestHeader(SHARER_USER_ID) Integer userId,
                         @PathVariable Integer itemId) {
         log.info("Получен GET запрос к эндпоинту: '/items'," +

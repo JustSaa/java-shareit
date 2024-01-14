@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.NotFoundException;
@@ -14,15 +15,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
-
-    @Autowired
-    public ItemServiceImpl(ItemStorage itemStorage, UserStorage userStorage) {
-        this.itemStorage = itemStorage;
-        this.userStorage = userStorage;
-    }
 
     @Override
     public ItemCreateDto create(Item item, Integer userId) {
@@ -45,11 +41,11 @@ public class ItemServiceImpl implements ItemService {
 
         userAuthorizedCheck(updatedItem, userId);
 
-        if (item.getName() != null && !item.getName().isEmpty()) {
+        if (item.getName() != null && !item.getName().isBlank()) {
             updatedItem.setName(item.getName());
         }
 
-        if (item.getDescription() != null && !item.getDescription().isEmpty()) {
+        if (item.getDescription() != null && !item.getDescription().isBlank()) {
             updatedItem.setDescription(item.getDescription());
         }
 

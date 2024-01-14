@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.DuplicateException;
@@ -12,9 +13,9 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Override
     public UserCreateDto create(User user) {
@@ -38,11 +39,11 @@ public class UserServiceImpl implements UserService {
     public User update(User user, Integer userId) {
         userExistenceCheck(userId);
         User userToUpdate = userStorage.findById(userId).get();
-        if (user.getEmail() != null && !user.getEmail().equals(userToUpdate.getEmail()) && !user.getEmail().isEmpty()) {
+        if (user.getEmail() != null && !user.getEmail().equals(userToUpdate.getEmail()) && !user.getEmail().isBlank()) {
             validationEmail(user);
             userToUpdate.setEmail(user.getEmail());
         }
-        if (user.getName() != null && !user.getName().isEmpty()) {
+        if (user.getName() != null && !user.getName().isBlank()) {
             userToUpdate.setName(user.getName());
         }
         userStorage.delete(userId);

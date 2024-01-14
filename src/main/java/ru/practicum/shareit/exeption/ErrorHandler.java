@@ -25,6 +25,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     public ResponseEntity<List<String>> internalServerErrorHandler(final RuntimeException e) {
+        log.error(e.getMessage());
         return new ResponseEntity<>(List.of("Internal Server Error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
