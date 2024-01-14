@@ -9,7 +9,6 @@ import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.controller.Create;
-import ru.practicum.shareit.user.controller.PatchUpdate;
 
 import java.util.List;
 
