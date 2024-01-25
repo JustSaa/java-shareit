@@ -1,43 +1,45 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exeption.DuplicateException;
-import ru.practicum.shareit.exeption.NotFoundException;
-import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.exception.DuplicateException;
+import ru.practicum.shareit.exception.EmailNotUniqueException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
     @Override
-    public UserCreateDto create(User user) {
-        validationEmail(user);
-        userStorage.create(user);
-        return UserMapper.userCreateDto(user);
+    public User create(User user) {
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailNotUniqueException("Email should be unique");
+        }
     }
 
     @Override
     public User findById(Integer userId) {
         userExistenceCheck(userId);
-        return userStorage.findById(userId).get();
+        return userRepository.findById(userId).get();
     }
 
     @Override
     public List<User> findAll() {
-        return userStorage.findAll();
+        return userRepository.findAll();
     }
 
     @Override
     public User update(User user, Integer userId) {
         userExistenceCheck(userId);
-        User userToUpdate = userStorage.findById(userId).get();
+        User userToUpdate = userRepository.findById(userId).get();
         if (user.getEmail() != null && !user.getEmail().equals(userToUpdate.getEmail()) && !user.getEmail().isBlank()) {
             validationEmail(user);
             userToUpdate.setEmail(user.getEmail());
@@ -45,17 +47,18 @@ public class UserServiceImpl implements UserService {
         if (user.getName() != null && !user.getName().isBlank()) {
             userToUpdate.setName(user.getName());
         }
-        userStorage.delete(userId);
-        return userStorage.update(userToUpdate);
+        //userToUpdate.setId(userId);
+        //userRepository.delete(userToUpdate);
+        return userRepository.save(userToUpdate);
     }
 
     @Override
     public void delete(Integer userId) {
-        userStorage.delete(userId);
+        userRepository.deleteById(userId);
     }
 
     private void userExistenceCheck(Integer id) {
-        if (userStorage.findById(id).isEmpty()) {
+        if (userRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Нет пользователя с id = " + id);
         }
     }
@@ -63,7 +66,7 @@ public class UserServiceImpl implements UserService {
     private void validationEmail(User user) {
         String userEmail = user.getEmail();
 
-        boolean isEmailValid = userStorage.findAll().stream()
+        boolean isEmailValid = userRepository.findAll().stream()
                 .noneMatch(existingUser -> existingUser.getEmail().equals(userEmail));
 
         if (!isEmailValid) {
