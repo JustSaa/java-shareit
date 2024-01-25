@@ -25,10 +25,9 @@ public class User {
     private Integer id;
     @NotBlank(groups = Create.class, message = "Имя не должно быть пустым")
     private String name;
-    //@NotBlank(groups = Create.class, message = "Email не должно быть пустым")
     @NotNull(groups = Create.class)
     @Email(groups = {Create.class, Update.class})
-    @Column(unique=true)
+    @Column(unique = true)
     private String email;
     @OneToMany(mappedBy = "owner")
     private List<Item> items = new ArrayList<>();
