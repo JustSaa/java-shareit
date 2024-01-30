@@ -61,13 +61,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse bookingNotFoundException(final BookingNotFoundException e) {
-        log.error(e.getMessage());
-        return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), e.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse emailNotUniqueException(final EmailNotUniqueException e) {
         log.error(e.getMessage());

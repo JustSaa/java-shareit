@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -8,6 +9,7 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedException;
 import ru.practicum.shareit.exception.UnavailableItemException;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -18,6 +20,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +28,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
@@ -34,6 +39,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item create(Item item, Integer userId) {
+        log.debug("Create ItemDB: {}, userId: {}", item, userId);
         userExistenceCheck(userId);
         User user = userRepository.findById(userId).get();
         item.setOwner(user);
@@ -42,24 +48,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item update(Item item, Integer userId, Integer itemId) {
+        log.debug("Update ItemDB: {}, userId: {}, itemId: {}", item, userId, itemId);
         userExistenceCheck(userId);
-
         Optional<Item> existingItem = itemRepository.findById(itemId);
         if (existingItem.isEmpty()) {
             throw new NotFoundException("Предмет с id:" + itemId + " не найден");
         }
 
         Item updatedItem = existingItem.get();
-
         userAuthorizedCheck(updatedItem, userId);
-
         updateFields(item, updatedItem);
-
-        itemRepository.save(updatedItem);
-
         return updatedItem;
     }
-
 
     @Override
     public Item findByItemId(Integer itemId) {
@@ -140,7 +140,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Comment saveComment(Comment comment) {
+    public Comment saveComment(Integer itemId, CommentCreateDto commentCreateDto, Integer userId) {
+        log.debug("Create Comment: {}, itemId: {}, userId: {}", commentCreateDto, itemId, userId);
+        userExistenceCheck(userId);
+        User author = userRepository.findById(userId).get();
+        Item item = findByItemId(itemId);
+        Comment comment = ItemMapper.toComment(commentCreateDto, author, item);
         List<Booking> userBookings = bookingRepository.findAllPastByBooker(comment.getAuthor());
         boolean doesAuthorRentThisItem = userBookings.stream().anyMatch(booking ->
                 booking.getItem().getId().equals(comment.getItem().getId()));

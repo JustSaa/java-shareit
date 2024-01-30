@@ -2,91 +2,65 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.dto.BookingState;
-import ru.practicum.shareit.exception.BookingNotFoundException;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.constants.Constants;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
-    private static final String SHARER_USER_ID = "X-Sharer-User-Id";
-
     private final BookingService bookingService;
-    private final UserService userService;
-    private final ItemService itemService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public BookingResponseDto saveBooking(@Valid @RequestBody BookingCreateDto bookingCreateDto,
-                                        @RequestHeader(SHARER_USER_ID) Integer userId) {
-        validateBookingDuration(bookingCreateDto.getStart(), bookingCreateDto.getEnd());
-        Item item = itemService.findByItemId(bookingCreateDto.getItemId());
-        User booker = userService.findById(userId);
-        compareBookerAndItemOwner(booker, item);
-        Booking booking = BookingMapper.fromBookingCreateDto(bookingCreateDto, item, booker);
-        return BookingMapper.toBookingReturnDto(
-                bookingService.saveBooking(booking));
+                                          @RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
+        log.info("Получен POST запрос к эндпоинту: '/bookings', Строка параметра запроса для booking: {}", bookingCreateDto);
+        return bookingService.saveBooking(bookingCreateDto, userId);
     }
 
     @PatchMapping("/{bookingId}")
+    @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto approveBooking(@PathVariable("bookingId") Integer bookingId,
                                              @RequestParam("approved") Boolean approved,
-                                             @RequestHeader(SHARER_USER_ID) Integer userId) {
-        return BookingMapper.toBookingReturnDto(
-                bookingService.approveBooking(bookingId, approved, userId));
+                                             @RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
+        log.info("Получен PATCH запрос к эндпоинту: '/bookings" +
+                " Строка параметра запроса для bookingId: {} к approved: {}", bookingId, approved);
+        return bookingService.approveBooking(bookingId, approved, userId);
     }
 
     @GetMapping("/{bookingId}")
+    @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto getBooking(@PathVariable("bookingId") Integer bookingId,
-                                         @RequestHeader(SHARER_USER_ID) Integer userId) {
-        return BookingMapper.toBookingReturnDto(
-                bookingService.getBookingById(bookingId, userId));
+                                         @RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
+        log.info("Получен GET запрос к эндпоинту: '/bookings" +
+                " Строка параметра запроса для bookingId: {} и userId: {}", bookingId, userId);
+        return bookingService.getBookingById(bookingId, userId);
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getMyBookingRequests(@RequestParam(value = "state", defaultValue = "ALL") String state,
-                                                         @RequestHeader(SHARER_USER_ID) Integer userId) {
-        BookingState bookingState = BookingState.fromString(state);
-        return bookingService.getBookingRequestsByUserId(userId, bookingState).stream()
-                .map(BookingMapper::toBookingReturnDto)
-                .collect(Collectors.toList());
+                                                         @RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
+        log.info("Получен GET запрос к эндпоинту: '/bookings" +
+                " Строка параметра запроса для state: {} и userId: {}", state, userId);
+        return bookingService.getBookingRequestsByUserId(userId, state);
     }
 
     @GetMapping("/owner")
+    @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getMyBookings(@RequestParam(value = "state", defaultValue = "ALL") String state,
-                                                  @RequestHeader(SHARER_USER_ID) Integer userId) {
-        BookingState bookingState = BookingState.fromString(state);
-        return bookingService.getBookingsByOwnerId(userId, bookingState).stream()
-                .map(BookingMapper::toBookingReturnDto)
-                .collect(Collectors.toList());
-    }
-
-    private void validateBookingDuration(LocalDateTime start, LocalDateTime end) {
-        if (start.isAfter(end) || start.isEqual(end)) {
-            throw new ValidationException("Start time (" + start +
-                    ") is after then end time (" + end + ")");
-        }
-    }
-
-    private void compareBookerAndItemOwner(User booker, Item item) {
-        if (booker.getId().equals(item.getOwner().getId())) {
-            throw new BookingNotFoundException("Item " + item.getId() + " is your");
-        }
+                                                  @RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
+        log.info("Получен GET запрос к эндпоинту: '/bookings" +
+                " Строка параметра запроса для state: {} и userId: {}", state, userId);
+        return bookingService.getBookingsByOwnerId(userId, state);
     }
 }

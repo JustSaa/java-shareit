@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
@@ -22,5 +23,5 @@ public interface ItemService {
 
     ItemResponseDto findItemByUserIdAndItemId(Integer itemId, Integer userId);
 
-    Comment saveComment(Comment comment);
+    Comment saveComment(Integer itemId, CommentCreateDto commentCreateDto, Integer userId);
 }

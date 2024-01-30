@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateException;
@@ -9,15 +10,19 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
     public User create(User user) {
+        log.debug("Create User: {}", user);
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
@@ -38,6 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(User user, Integer userId) {
+        log.debug("Update User: {}, userId: {}", user, userId);
         userExistenceCheck(userId);
         User userToUpdate = userRepository.findById(userId).get();
         if (user.getEmail() != null && !user.getEmail().equals(userToUpdate.getEmail()) && !user.getEmail().isBlank()) {
@@ -47,9 +53,7 @@ public class UserServiceImpl implements UserService {
         if (user.getName() != null && !user.getName().isBlank()) {
             userToUpdate.setName(user.getName());
         }
-        //userToUpdate.setId(userId);
-        //userRepository.delete(userToUpdate);
-        return userRepository.save(userToUpdate);
+        return userToUpdate;
     }
 
     @Override

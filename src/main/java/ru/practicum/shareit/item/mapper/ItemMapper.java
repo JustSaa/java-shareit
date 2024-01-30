@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
@@ -13,15 +14,16 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@UtilityClass
 public class ItemMapper {
-    public static ItemDto toItemDto(Item item) {
+    public ItemDto toItemDto(Item item) {
         return new ItemDto(item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable());
     }
 
-    public static Item toItem(ItemDto itemDto, User owner) {
+    public Item toItem(ItemDto itemDto, User owner) {
         return new Item(itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
@@ -30,9 +32,9 @@ public class ItemMapper {
                 null); // comments
     }
 
-    public static ItemResponseDto toItemReturnDto(Item item,
-                                                  Optional<Booking> lastBooking,
-                                                  Optional<Booking> nextBooking) {
+    public ItemResponseDto toItemReturnDto(Item item,
+                                           Optional<Booking> lastBooking,
+                                           Optional<Booking> nextBooking) {
         return new ItemResponseDto(item.getId(),
                 item.getName(),
                 item.getDescription(),
@@ -44,7 +46,7 @@ public class ItemMapper {
                         .collect(Collectors.toList()));
     }
 
-    public static Comment toComment(CommentCreateDto commentCreateDto, User author, Item item) {
+    public Comment toComment(CommentCreateDto commentCreateDto, User author, Item item) {
         return new Comment(null,
                 commentCreateDto.getText(),
                 item,
@@ -52,7 +54,7 @@ public class ItemMapper {
                 LocalDateTime.now());
     }
 
-    public static CommentResponseDto toCommentReturnDto(Comment comment) {
+    public CommentResponseDto toCommentReturnDto(Comment comment) {
         return new CommentResponseDto(comment.getId(),
                 comment.getText(),
                 comment.getItem().getName(),
@@ -60,7 +62,7 @@ public class ItemMapper {
                 comment.getCreated());
     }
 
-    private static ItemResponseDto.BookingDto getBookingDtoIfExist(Optional<Booking> booking) {
+    private ItemResponseDto.BookingDto getBookingDtoIfExist(Optional<Booking> booking) {
         if (booking.isEmpty()) {
             return null;
         } else {
