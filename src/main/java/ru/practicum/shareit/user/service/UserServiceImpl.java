@@ -15,11 +15,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    @Transactional
     @Override
     public User create(User user) {
         log.debug("Create User: {}", user);
@@ -30,17 +30,20 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Transactional
     @Override
     public User findById(Integer userId) {
         userExistenceCheck(userId);
         return userRepository.findById(userId).get();
     }
 
+    @Transactional
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
+    @Transactional
     @Override
     public User update(User user, Integer userId) {
         log.debug("Update User: {}, userId: {}", user, userId);
@@ -56,6 +59,7 @@ public class UserServiceImpl implements UserService {
         return userToUpdate;
     }
 
+    @Transactional
     @Override
     public void delete(Integer userId) {
         userRepository.deleteById(userId);

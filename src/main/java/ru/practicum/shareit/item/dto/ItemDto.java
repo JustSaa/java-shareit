@@ -17,4 +17,9 @@ public class ItemDto {
     private String description;
     @NotNull(groups = Create.class, message = "Введите статус для предмета")
     private Boolean available;
+
+    public ItemDto(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

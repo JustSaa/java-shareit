@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
@@ -33,6 +32,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserService userService;
     private final ItemRepository itemRepository;
 
+    @Transactional
     @Override
     public BookingResponseDto saveBooking(BookingCreateDto bookingCreateDto, Integer userId) {
         log.debug("Create Booking: {}, userId: {}", bookingCreateDto, userId);
@@ -52,6 +52,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingReturnDto(bookingRepository.save(booking));
     }
 
+    @Transactional
     @Override
     public BookingResponseDto approveBooking(Integer bookingId, Boolean isApproved, Integer ownerId) {
         log.debug("Approve Booking: bookingId: {}, userId: {}, approving: {}", bookingId, ownerId, isApproved);
@@ -64,6 +65,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingReturnDto(booking);
     }
 
+    @Transactional
     @Override
     public BookingResponseDto getBookingById(Integer bookingId, Integer userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
@@ -73,6 +75,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingReturnDto(booking);
     }
 
+    @Transactional
     @Override
     public List<BookingResponseDto> getBookingRequestsByUserId(Integer userId, String state) {
         BookingState bookingState = BookingState.fromString(state);
@@ -107,6 +110,7 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public List<BookingResponseDto> getBookingsByOwnerId(Integer ownerId, String state) {
         BookingState bookingState = BookingState.fromString(state);

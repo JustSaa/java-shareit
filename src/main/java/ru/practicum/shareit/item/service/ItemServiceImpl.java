@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
@@ -37,6 +36,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingService bookingService;
     private final CommentRepository commentRepository;
 
+    @Transactional
     @Override
     public Item create(Item item, Integer userId) {
         log.debug("Create ItemDB: {}, userId: {}", item, userId);
@@ -46,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.save(item);
     }
 
+    @Transactional
     @Override
     public Item update(Item item, Integer userId, Integer itemId) {
         log.debug("Update ItemDB: {}, userId: {}, itemId: {}", item, userId, itemId);
@@ -61,6 +62,7 @@ public class ItemServiceImpl implements ItemService {
         return updatedItem;
     }
 
+    @Transactional
     @Override
     public Item findByItemId(Integer itemId) {
         Optional<Item> item = itemRepository.findById(itemId);
@@ -70,6 +72,7 @@ public class ItemServiceImpl implements ItemService {
         return item.get();
     }
 
+    @Transactional
     @Override
     public List<ItemResponseDto> findAllItems(Integer userId) {
         userExistenceCheck(userId);
@@ -80,6 +83,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public ItemResponseDto findItemByUserIdAndItemId(Integer itemId, Integer userId) {
         userExistenceCheck(userId);
@@ -95,12 +99,14 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Transactional
     @Override
     public void delete(Integer itemId, Integer userId) {
         userAuthorizedCheck(findByItemId(itemId), userId);
         itemRepository.deleteById(itemId);
     }
 
+    @Transactional
     public List<ItemDto> searchItem(Integer userId, String text) {
         userExistenceCheck(userId);
         if (text == null || text.isBlank()) {
@@ -139,6 +145,7 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Transactional
     @Override
     public Comment saveComment(Integer itemId, CommentCreateDto commentCreateDto, Integer userId) {
         log.debug("Create Comment: {}, itemId: {}, userId: {}", commentCreateDto, itemId, userId);
