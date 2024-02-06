@@ -1,7 +1,9 @@
 package ru.practicum.shareit.user.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.controller.Create;
 import ru.practicum.shareit.user.controller.Update;
 
@@ -10,6 +12,8 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder(toBuilder = true)
 public class UserDto {
     private Integer id;
     @NotBlank(groups = Create.class, message = "Имя не должно быть пустым")

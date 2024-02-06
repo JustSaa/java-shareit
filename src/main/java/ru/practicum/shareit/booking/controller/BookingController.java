@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
@@ -10,12 +11,16 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.constants.Constants;
 
 import javax.validation.Valid;
+import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Positive;
 import java.util.List;
+
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
+@Validated
 public class BookingController {
     private final BookingService bookingService;
 
@@ -49,18 +54,26 @@ public class BookingController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getMyBookingRequests(@RequestParam(value = "state", defaultValue = "ALL") String state,
-                                                         @RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
+                                                         @RequestHeader(Constants.SHARER_USER_ID) Integer userId,
+                                                         @PositiveOrZero
+                                                         @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT) int from,
+                                                         @Positive
+                                                         @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT) int size) {
         log.info("Получен GET запрос к эндпоинту: '/bookings" +
                 " Строка параметра запроса для state: {} и userId: {}", state, userId);
-        return bookingService.getBookingRequestsByUserId(userId, state);
+        return bookingService.getBookingRequestsByUserId(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponseDto> getMyBookings(@RequestParam(value = "state", defaultValue = "ALL") String state,
-                                                  @RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
+                                                  @RequestHeader(Constants.SHARER_USER_ID) Integer userId,
+                                                  @PositiveOrZero
+                                                  @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT) int from,
+                                                  @Positive
+                                                  @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT) int size) {
         log.info("Получен GET запрос к эндпоинту: '/bookings" +
                 " Строка параметра запроса для state: {} и userId: {}", state, userId);
-        return bookingService.getBookingsByOwnerId(userId, state);
+        return bookingService.getBookingsByOwnerId(userId, state, from, size);
     }
 }

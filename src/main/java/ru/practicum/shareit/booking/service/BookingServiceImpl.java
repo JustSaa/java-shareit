@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
@@ -45,11 +47,11 @@ public class BookingServiceImpl implements BookingService {
         Item item = optionalItem.get();
         User booker = userService.findById(userId);
         compareBookerAndItemOwner(booker, item);
-        Booking booking = BookingMapper.fromBookingCreateDto(bookingCreateDto, item, booker);
+        Booking booking = BookingMapper.toBooking(bookingCreateDto, item, booker);
         if (!booking.getItem().getAvailable().equals(Boolean.TRUE)) {
             throw new UnavailableItemException(booking.getItem().getId());
         }
-        return BookingMapper.toBookingReturnDto(bookingRepository.save(booking));
+        return BookingMapper.toBookingResponseDto(bookingRepository.save(booking));
     }
 
     @Transactional
@@ -62,7 +64,7 @@ public class BookingServiceImpl implements BookingService {
         BookingStatus newStatus = BookingStatus.approve(isApproved);
         checkBookingBeforeApprove(booking, newStatus, ownerId);
         booking.setStatus(newStatus);
-        return BookingMapper.toBookingReturnDto(booking);
+        return BookingMapper.toBookingResponseDto(booking);
     }
 
     @Transactional
@@ -72,89 +74,96 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Booking " + bookingId + " not found");
         });
         checkAccess(booking, userId);
-        return BookingMapper.toBookingReturnDto(booking);
+        return BookingMapper.toBookingResponseDto(booking);
     }
 
     @Transactional
     @Override
-    public List<BookingResponseDto> getBookingRequestsByUserId(Integer userId, String state) {
+    public List<BookingResponseDto> getBookingRequestsByUserId(Integer userId, String state, int from, int size) {
         BookingState bookingState = BookingState.fromString(state);
         User booker = userRepository.findById(userId).orElseThrow(() -> {
             throw new NotFoundException("Пользователь с не найден userId: " + userId);
         });
+        Pageable pageRequest = PageRequest.of(from / size, size);
         List<Booking> bookingResponseDtos;
+        log.debug("Get Booking by User request: state: {}, userId: {}", bookingState, userId);
         switch (bookingState) {
             case ALL:
-                bookingResponseDtos = bookingRepository.findAllByBookerOrderByStartDesc(booker);
+                bookingResponseDtos = bookingRepository.findAllByBookerOrderByStartDesc(booker, pageRequest).getContent();
                 break;
             case CURRENT:
-                bookingResponseDtos = bookingRepository.findAllCurrentByBooker(booker);
+                bookingResponseDtos = bookingRepository.findAllCurrentByBooker(booker, pageRequest).getContent();
                 break;
             case PAST:
-                bookingResponseDtos = bookingRepository.findAllPastByBooker(booker);
+                bookingResponseDtos = bookingRepository.findAllPastByBooker(booker, pageRequest).getContent();
                 break;
             case FUTURE:
-                bookingResponseDtos = bookingRepository.findAllFutureByBooker(booker);
+                bookingResponseDtos = bookingRepository.findAllFutureByBooker(booker, pageRequest).getContent();
                 break;
             case WAITING:
-                bookingResponseDtos = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker, BookingStatus.WAITING);
+                bookingResponseDtos = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker,
+                        BookingStatus.WAITING, pageRequest).getContent();
                 break;
             case REJECTED:
-                bookingResponseDtos = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker, BookingStatus.REJECTED);
+                bookingResponseDtos = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker,
+                        BookingStatus.REJECTED, pageRequest).getContent();
                 break;
             default:
                 throw new InvalidStatusException();
         }
         return bookingResponseDtos.stream()
-                .map(BookingMapper::toBookingReturnDto)
+                .map(BookingMapper::toBookingResponseDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
-    public List<BookingResponseDto> getBookingsByOwnerId(Integer ownerId, String state) {
+    public List<BookingResponseDto> getBookingsByOwnerId(Integer ownerId, String state, int from, int size) {
         BookingState bookingState = BookingState.fromString(state);
         User owner = userRepository.findById(ownerId).orElseThrow(() -> {
             throw new NotFoundException("Пользователь не найден userId: " + ownerId);
         });
+        Pageable pageRequest = PageRequest.of(from / size, size);
         List<Booking> bookingResponseDtos;
         switch (bookingState) {
             case ALL:
-                bookingResponseDtos = bookingRepository.findAllByItemOwnerOrderByStartDesc(owner);
+                bookingResponseDtos = bookingRepository.findAllByItemOwnerOrderByStartDesc(owner, pageRequest).getContent();
                 break;
             case CURRENT:
-                bookingResponseDtos = bookingRepository.findAllCurrentByOwner(owner);
+                bookingResponseDtos = bookingRepository.findAllCurrentByOwner(owner, pageRequest).getContent();
                 break;
             case PAST:
-                bookingResponseDtos = bookingRepository.findAllPastByOwner(owner);
+                bookingResponseDtos = bookingRepository.findAllPastByOwner(owner, pageRequest).getContent();
                 break;
             case FUTURE:
-                bookingResponseDtos = bookingRepository.findAllFutureByOwner(owner);
+                bookingResponseDtos = bookingRepository.findAllFutureByOwner(owner, pageRequest).getContent();
                 break;
             case WAITING:
-                bookingResponseDtos = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner, BookingStatus.WAITING);
+                bookingResponseDtos = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner,
+                        BookingStatus.WAITING, pageRequest).getContent();
                 break;
             case REJECTED:
-                bookingResponseDtos = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner, BookingStatus.REJECTED);
+                bookingResponseDtos = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner,
+                        BookingStatus.REJECTED, pageRequest).getContent();
                 break;
             default:
                 throw new InvalidStatusException();
         }
         return bookingResponseDtos.stream()
-                .map(BookingMapper::toBookingReturnDto)
+                .map(BookingMapper::toBookingResponseDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Booking> getLastBookingByItem(Item item) {
-        return bookingRepository.findAllPastOrCurrentByItemDesc(item).stream()
-                .findFirst();
+    public Booking getLastBookingByItem(Item item) {
+        return bookingRepository.findAllPastOrCurrentByItemDesc(item, PageRequest.of(0, 1)).stream()
+                .findFirst().orElse(null);
     }
 
     @Override
-    public Optional<Booking> getNextBookingByItem(Item item) {
-        return bookingRepository.findAllFutureByItemAsc(item).stream()
-                .findFirst();
+    public Booking getNextBookingByItem(Item item) {
+        return bookingRepository.findAllFutureByItemAsc(item, PageRequest.of(0, 1)).stream()
+                .findFirst().orElse(null);
     }
 
     private void checkBookingBeforeApprove(Booking booking, BookingStatus newStatus, Integer ownerId) {

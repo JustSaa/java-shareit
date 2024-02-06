@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS items (
      owner_id BIGINT NOT NULL,
      PRIMARY KEY (id),
      FOREIGN KEY (owner_id) REFERENCES users(id)
+     FOREIGN KEY (request_id) REFERENCES requests(id)
 );
 
 CREATE TABLE IF NOT EXISTS bookings (
