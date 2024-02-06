@@ -52,4 +52,31 @@ public class ErrorHandlerTests {
 
         assertEquals(HttpStatus.FORBIDDEN.value(), errorResponse.getStatus());
     }
+
+    @Test
+    public void testInvalidStatusException() {
+        InvalidStatusException invalidStatusException = new InvalidStatusException("Invalid Status");
+
+        ErrorResponse errorResponse = errorHandler.invalidStatusException(invalidStatusException);
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorResponse.getStatus());
+    }
+
+    @Test
+    public void testUnavailableItemException() {
+        UnavailableItemException unavailableItemException = new UnavailableItemException(1);
+
+        ErrorResponse errorResponse = errorHandler.unavailableItemException(unavailableItemException);
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorResponse.getStatus());
+    }
+
+    @Test
+    public void testEmailNotUniqueException() {
+        EmailNotUniqueException emailNotUniqueException = new EmailNotUniqueException("Email Not Unique");
+
+        ErrorResponse errorResponse = errorHandler.emailNotUniqueException(emailNotUniqueException);
+
+        assertEquals(HttpStatus.CONFLICT.value(), errorResponse.getStatus());
+    }
 }
