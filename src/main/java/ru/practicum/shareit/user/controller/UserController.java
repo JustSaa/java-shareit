@@ -5,11 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -21,30 +23,32 @@ public class UserController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<User> findAll() {
+    public List<UserDto> findAll() {
         log.info("Получен GET запрос к эндпоинту: '/users'");
-        return userService.findAll();
+        return userService.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public User findById(@PathVariable Integer userId) {
+    public UserDto findById(@PathVariable Integer userId) {
         log.info("Получен GET запрос к эндпоинту: '/users'. Запрос для пользователя с userId: {}", userId);
-        return userService.findById(userId);
+        return UserMapper.toUserDto(userService.findById(userId));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserCreateDto create(@Validated(Create.class) @RequestBody User user) {
+    public UserDto create(@Validated(Create.class) @RequestBody User user) {
         log.info("Получен POST запрос к эндпоинту: '/users', Строка параметров запроса: {}", user.toString());
-        return userService.create(user);
+        return UserMapper.toUserDto(userService.create(user));
     }
 
     @PatchMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public User updateUser(@Validated(Update.class) @RequestBody User user, @PathVariable Integer userId) {
+    public UserDto updateUser(@Validated(Update.class) @RequestBody User user, @PathVariable Integer userId) {
         log.info("Получен PATCH запрос к эндпоинту: '/users', Строка параметров запроса: {}", user.toString());
-        return userService.update(user, userId);
+        return UserMapper.toUserDto(userService.update(user, userId));
     }
 
     @DeleteMapping("/{userId}")

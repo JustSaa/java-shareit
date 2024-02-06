@@ -22,4 +22,8 @@ public class UserDto {
         this.name = name;
         this.email = email;
     }
+
+    public UserDto(Integer userId) {
+        this.id = userId;
+    }
 }
