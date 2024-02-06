@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.UnauthorizedException;
 import ru.practicum.shareit.exception.UnavailableItemException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -13,6 +14,8 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -51,7 +54,6 @@ class ItemServiceTest {
     private Item item;
     private Item item2;
     private ItemDto item3;
-
     private Item itemWithoutId;
     private Item itemWithoutIdUser2;
     private ItemDto itemWithoutIdDto;
@@ -69,7 +71,7 @@ class ItemServiceTest {
         itemWithoutIdDto = makeItemDto(null, "item1", "description1", true,
                 1);
         item = makeItem(1, "item1", "description1", true,
-                user, null, null);
+                user, new ArrayList<>(), null);
         item2 = makeItem(1, "item1", "description1", true,
                 userForTest, null, null);
         item3 = makeItemDto(1, "item1", "description1", true,
@@ -95,7 +97,7 @@ class ItemServiceTest {
         when(userRepository.findById(2)).thenReturn(Optional.ofNullable(userForTest));
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item2));
 
-        Item updatedItem = itemService.update(item3, 2,1);
+        Item updatedItem = itemService.update(item3, 2, 1);
 
         assertEquals(item2, updatedItem);
         verify(userRepository, times(2)).findById(2);
@@ -168,5 +170,77 @@ class ItemServiceTest {
         verify(bookingRepository).findAllPastByBooker(booker);
         verifyNoMoreInteractions(bookingRepository);
         verifyNoInteractions(commentRepository);
+    }
+
+    @Test
+    void findItemByUserIdAndItemId_NotOwner() {
+        when(userRepository.findById(2)).thenReturn(Optional.of(userForTest));
+        when(itemRepository.findById(1)).thenReturn(Optional.of(item));
+
+        ItemResponseDto responseDto = itemService.findItemByUserIdAndItemId(1, 2);
+
+        assertEquals(ItemMapper.toItemResponseDto(item, null, null), responseDto);
+
+        verify(userRepository).findById(2);
+        verify(itemRepository).findById(1);
+        verify(bookingService, never()).getLastBookingByItem(item);
+        verify(bookingService, never()).getNextBookingByItem(item);
+    }
+
+    @Test
+    void findItemByUserIdAndItemId_UserNotFound() {
+        when(userRepository.findById(1)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> itemService.findItemByUserIdAndItemId(1, 1));
+
+        verify(userRepository).findById(1);
+        verifyNoInteractions(itemRepository);
+        verifyNoInteractions(bookingService);
+    }
+
+    @Test
+    void findItemByUserIdAndItemId_ItemNotFound() {
+        when(userRepository.findById(2)).thenReturn(Optional.of(userForTest));
+        when(itemRepository.findById(1)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> itemService.findItemByUserIdAndItemId(1, 2));
+
+        verify(userRepository).findById(2);
+        verify(itemRepository).findById(1);
+        verifyNoInteractions(bookingService);
+    }
+
+    @Test
+    void delete_WhenUserIsAuthorized_ShouldDeleteItem() {
+        Integer itemId = 1;
+        Integer userId = 2;
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(itemWithoutIdUser2));
+
+        itemService.delete(itemId, userId);
+
+        verify(itemRepository, times(1)).deleteById(itemId);
+    }
+
+    @Test
+    void delete_WhenUserIsNotAuthorized_ShouldThrowException() {
+        Integer itemId = 1;
+        Integer userId = 1;
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(itemWithoutIdUser2));
+
+        assertThrows(UnauthorizedException.class, () -> itemService.delete(itemId, userId));
+        verify(itemRepository, never()).deleteById(itemId);
+    }
+
+    @Test
+    void delete_WhenItemNotFound_ShouldThrowException() {
+        Integer itemId = 1;
+        Integer userId = 1;
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> itemService.delete(itemId, userId));
+        verify(itemRepository, never()).deleteById(itemId);
     }
 }

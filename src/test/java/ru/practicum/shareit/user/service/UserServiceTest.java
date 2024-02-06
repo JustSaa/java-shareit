@@ -5,10 +5,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import ru.practicum.shareit.exception.DuplicateException;
+import ru.practicum.shareit.exception.EmailNotUniqueException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -104,5 +110,25 @@ public class UserServiceTest {
 
         verify(userRepository).findAll();
         verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    public void testCreateUser_DuplicateEmail() {
+        User user = new User();
+        user.setEmail("existing@example.com");
+
+        when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
+
+        assertThrows(DuplicateException.class, () -> userService.validationEmail(user));
+    }
+
+    @Test
+    public void testCreateUser_UniqueEmail() {
+        User user = new User();
+        user.setEmail("existing@example.com");
+
+        when(userRepository.save(user)).thenThrow(DataIntegrityViolationException.class);
+
+        assertThrows(EmailNotUniqueException.class, () -> userService.create(user));
     }
 }

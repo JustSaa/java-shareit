@@ -14,4 +14,6 @@ public interface UserService {
     User update(User user, Integer userId);
 
     void delete(Integer userId);
+
+    void validationEmail(User user);
 }

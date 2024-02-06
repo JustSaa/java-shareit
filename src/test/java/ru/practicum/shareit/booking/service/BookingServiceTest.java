@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.exception.InvalidStatusException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.UnavailableItemException;
@@ -112,6 +113,18 @@ class BookingServiceTest {
 
         verify(bookingRepository).findById(booking.getId());
         verifyNoMoreInteractions(bookingRepository);
+    }
+
+    @Test
+    public void checkApproveBooking_invalidStatusException() {
+        int ownerId = 1;
+        String invalidState = "INVALID_STATE";
+        int from = 0;
+        int size = 10;
+
+        assertThrows(InvalidStatusException.class, () -> {
+            bookingService.getBookingsByOwnerId(ownerId, invalidState, from, size);
+        });
     }
 
     @Test
