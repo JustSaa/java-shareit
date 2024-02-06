@@ -16,6 +16,7 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
 import datas.LocalDateAdapter;
 import datas.LocalDateTimeAdapter;
+import ru.practicum.shareit.constants.Constants;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
@@ -27,9 +28,8 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static datas.ObjectMaker.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookingController.class)
 public class BookingControllerTest {
@@ -104,6 +104,31 @@ public class BookingControllerTest {
         verifyNoInteractions(itemService);
         verifyNoInteractions(userService);
         verifyNoInteractions(bookingService);
+    }
+
+    @Test
+    public void testGetMyBookings() throws Exception {
+        int userId = 1;
+        String state = "WAITING";
+        int from = 0;
+        int size = 5;
+        List<BookingResponseDto> bookings = List.of();
+
+        when(bookingService.getBookingsByOwnerId(userId, state, from, size)).thenReturn(bookings);
+
+        mockMvc.perform(get("/bookings/owner")
+                        .param("state", state)
+                        .header(Constants.SHARER_USER_ID, String.valueOf(userId))
+                        .param("from", String.valueOf(from))
+                        .param("size", String.valueOf(size))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray());
+
+        verify(bookingService).getBookingsByOwnerId(userId, state, from, size);
+        verifyNoMoreInteractions(bookingService);
     }
 
     @Test

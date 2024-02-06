@@ -268,4 +268,14 @@ class ItemControllerTest {
         verify(itemService).saveComment(item.getId(), commentBeforeSave, user.getId());
         verifyNoMoreInteractions(itemService);
     }
+
+    @Test
+    public void deleteItem_Success() throws Exception {
+        mockMvc.perform(delete("/items/{itemId}", 1)
+                        .header(USER_ID_HEADER, 1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(itemService).delete(1, 1);
+    }
 }

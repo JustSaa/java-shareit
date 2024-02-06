@@ -87,6 +87,16 @@ class BookingServiceTest {
     }
 
     @Test
+    public void checkSaveBooking_NotFoundItem() {
+        final var thrown = assertThrows(NotFoundException.class,
+                () -> bookingService.saveBooking(bookingDtoWithoutId, booker.getId()));
+
+        assertEquals("Нет вещи с id = " + booking.getItem().getId(), thrown.getMessage());
+
+        verifyNoMoreInteractions(bookingRepository);
+    }
+
+    @Test
     public void checkApproveBooking() {
         item.setOwner(booker);
         bookingWithoutId.setId(1);
@@ -99,6 +109,19 @@ class BookingServiceTest {
 
         verify(bookingRepository).findById(bookingWithoutId.getId());
         verifyNoMoreInteractions(bookingRepository);
+    }
+
+    @Test
+    public void checkApproveBooking_NotFoundBooking() {
+        Integer bookingId = 123;
+        Boolean isApproved = true;
+        Integer ownerId = 1;
+
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> {
+            bookingService.approveBooking(bookingId, isApproved, ownerId);
+        });
     }
 
     @Test
@@ -117,6 +140,18 @@ class BookingServiceTest {
 
     @Test
     public void checkApproveBooking_invalidStatusException() {
+        int ownerId = 1;
+        String invalidState = "INVALID_STATE";
+        int from = 0;
+        int size = 10;
+
+        assertThrows(InvalidStatusException.class, () -> {
+            bookingService.getBookingRequestsByUserId(ownerId, invalidState, from, size);
+        });
+    }
+
+    @Test
+    public void checkApproveBooking_invalidStatusExceptionUserId() {
         int ownerId = 1;
         String invalidState = "INVALID_STATE";
         int from = 0;
@@ -179,5 +214,18 @@ class BookingServiceTest {
 
         verify(bookingRepository).findById(any());
         verifyNoMoreInteractions(bookingRepository);
+    }
+
+    @Test
+    void getBookingsByOwnerId_userNotFound_throwsNotFoundException() {
+        int ownerId = 1;
+        String state = "ALL";
+        int from = 0;
+        int size = 10;
+        when(userRepository.findById(ownerId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> {
+            bookingService.getBookingsByOwnerId(ownerId, state, from, size);
+        });
     }
 }
