@@ -92,7 +92,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void checkSaveBooking_durationException() throws Exception {
+    public void checkSaveBookingDurationException() throws Exception {
         bookingCreateDto.setEnd(LocalDateTime.of(2021, 10, 11, 10, 10, 10));
         mockMvc.perform(post("/bookings")
                         .content(gson.toJson(bookingCreateDto))

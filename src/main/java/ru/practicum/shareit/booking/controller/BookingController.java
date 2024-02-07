@@ -56,9 +56,9 @@ public class BookingController {
     public List<BookingResponseDto> getMyBookingRequests(@RequestParam(value = "state", defaultValue = "ALL") String state,
                                                          @RequestHeader(Constants.SHARER_USER_ID) Integer userId,
                                                          @PositiveOrZero
-                                                         @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT) int from,
+                                                         @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT) Integer from,
                                                          @Positive
-                                                         @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT) int size) {
+                                                         @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT) Integer size) {
         log.info("Получен GET запрос к эндпоинту: '/bookings" +
                 " Строка параметра запроса для state: {} и userId: {}", state, userId);
         return bookingService.getBookingRequestsByUserId(userId, state, from, size);
@@ -69,9 +69,9 @@ public class BookingController {
     public List<BookingResponseDto> getMyBookings(@RequestParam(value = "state", defaultValue = "ALL") String state,
                                                   @RequestHeader(Constants.SHARER_USER_ID) Integer userId,
                                                   @PositiveOrZero
-                                                  @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT) int from,
+                                                  @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT) Integer from,
                                                   @Positive
-                                                  @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT) int size) {
+                                                  @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT) Integer size) {
         log.info("Получен GET запрос к эндпоинту: '/bookings" +
                 " Строка параметра запроса для state: {} и userId: {}", state, userId);
         return bookingService.getBookingsByOwnerId(userId, state, from, size);

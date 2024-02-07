@@ -67,7 +67,7 @@ class ItemRequestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .header(USER_ID_HEADER, requester.getId()))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json(gson.toJson(requestResponseDto)));
 
         verify(requestService).saveRequest(eq(requester.getId()), any());

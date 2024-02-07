@@ -45,7 +45,7 @@ class RequestServiceTest {
     }
 
     @Test
-    public void testSaveRequest_Success() {
+    public void testSaveRequestSuccess() {
         when(userRepository.findById(requester.getId())).thenReturn(Optional.of(requester));
         when(requestRepository.save(any(ItemRequest.class))).thenReturn(request);
 
@@ -79,7 +79,7 @@ class RequestServiceTest {
     }
 
     @Test
-    public void checkGetRequestById_requestNotFoundException() {
+    public void checkGetRequestByIdRequestNotFoundException() {
         when(requestRepository.findById(any())).thenReturn(Optional.empty());
 
         final var thrown = assertThrows(NotFoundException.class,

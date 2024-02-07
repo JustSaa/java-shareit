@@ -13,8 +13,6 @@ public interface ItemService {
 
     Item update(ItemDto item, Integer userId, Integer itemId);
 
-    Item findByItemId(Integer itemId);
-
     List<ItemResponseDto> findAllItems(Integer userId, int from, int size);
 
     void delete(Integer itemId, Integer userId);

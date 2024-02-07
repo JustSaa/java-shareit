@@ -26,7 +26,7 @@ public class ItemServiceIntegrationTest {
     private ItemService itemService;
 
     @Test
-    public void checkGetAllByUserId_twoItems() {
+    public void checkGetAllByUserIdTwoItems() {
         List<ItemResponseDto> items = itemService.findAllItems(2, 0, 2);
 
         assertThat(items, notNullValue());
@@ -38,7 +38,7 @@ public class ItemServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetAllByUserId_oneItems() {
+    public void checkGetAllByUserIdOneItems() {
         List<ItemResponseDto> items = itemService.findAllItems(2, 0, 1);
 
         assertThat(items, notNullValue());

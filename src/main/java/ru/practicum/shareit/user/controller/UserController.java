@@ -26,7 +26,7 @@ public class UserController {
     public List<UserDto> findAll() {
         log.info("Получен GET запрос к эндпоинту: '/users'");
         return userService.findAll().stream()
-                .map(UserMapper::toUserDto)
+                .map(UserMapper.INSTANCE::toUserDto)
                 .collect(Collectors.toList());
     }
 
@@ -34,21 +34,21 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UserDto findById(@PathVariable Integer userId) {
         log.info("Получен GET запрос к эндпоинту: '/users'. Запрос для пользователя с userId: {}", userId);
-        return UserMapper.toUserDto(userService.findById(userId));
+        return UserMapper.INSTANCE.toUserDto(userService.findById(userId));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@Validated(Create.class) @RequestBody User user) {
         log.info("Получен POST запрос к эндпоинту: '/users', Строка параметров запроса: {}", user.toString());
-        return UserMapper.toUserDto(userService.create(user));
+        return UserMapper.INSTANCE.toUserDto(userService.create(user));
     }
 
     @PatchMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public UserDto updateUser(@Validated(Update.class) @RequestBody User user, @PathVariable Integer userId) {
         log.info("Получен PATCH запрос к эндпоинту: '/users', Строка параметров запроса: {}", user.toString());
-        return UserMapper.toUserDto(userService.update(user, userId));
+        return UserMapper.INSTANCE.toUserDto(userService.update(user, userId));
     }
 
     @DeleteMapping("/{userId}")

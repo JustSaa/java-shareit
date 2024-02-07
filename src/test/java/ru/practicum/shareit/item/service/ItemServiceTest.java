@@ -67,7 +67,7 @@ class ItemServiceTest {
         itemWithoutId = makeItem(null, "item1", "description1", true,
                 user, null, null);
         itemWithoutIdUser2 = makeItem(null, "item1", "description1", true,
-                userForTest, new ArrayList<>(), null);
+                userForTest, null, null);
         itemWithoutIdDto = makeItemDto(null, "item1", "description1", true,
                 1);
         item = makeItem(1, "item1", "description1", true,
@@ -106,30 +106,9 @@ class ItemServiceTest {
     }
 
     @Test
-    public void checkUpdateItem_itemNoFoundException() {
+    public void checkUpdateItemItemNoFoundException() {
         final var thrown = assertThrows(NotFoundException.class, () -> itemService.update(itemWithoutIdDto, 1, 1));
         assertEquals("Нет пользователя с id =" + item.getId(), thrown.getMessage());
-    }
-
-    @Test
-    public void checkGetItem() {
-        when(itemRepository.findById(any())).thenReturn(Optional.of(item));
-
-        Item returnedItem = itemService.findByItemId(item.getId());
-        assertEquals(item, returnedItem);
-
-        verify(itemRepository).findById(item.getId());
-        verifyNoMoreInteractions(itemRepository);
-    }
-
-    @Test
-    public void checkGetAllByUserId() {
-        // IT ??
-    }
-
-    @Test
-    public void checkGetAllByTemplate() {
-        // IT
     }
 
     @Test
@@ -155,7 +134,7 @@ class ItemServiceTest {
     }
 
     @Test
-    public void checkSaveComment_authorWasNotBooker() {
+    public void checkSaveCommentAuthorWasNotBooker() {
         User booker = makeUser(1, "booker", "user@ya.ru");
         Comment commentBeforeSave = makeComment(null, "comment", item, booker, LocalDateTime.now());
         CommentCreateDto commentDtoBeforeSave = makeCreateComment("comment");
@@ -173,13 +152,13 @@ class ItemServiceTest {
     }
 
     @Test
-    void findItemByUserIdAndItemId_NotOwner() {
+    void findItemByUserIdAndItemIdNotOwner() {
         when(userRepository.findById(2)).thenReturn(Optional.of(userForTest));
         when(itemRepository.findById(1)).thenReturn(Optional.of(item));
 
         ItemResponseDto responseDto = itemService.findItemByUserIdAndItemId(1, 2);
 
-        assertEquals(ItemMapper.toItemResponseDto(item, null, null), responseDto);
+        assertEquals(ItemMapper.INSTANCE.toItemResponseDto(item, null, null), responseDto);
 
         verify(userRepository).findById(2);
         verify(itemRepository).findById(1);
@@ -188,7 +167,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void findItemByUserIdAndItemId_UserNotFound() {
+    void findItemByUserIdAndItemIdUserNotFound() {
         when(userRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> itemService.findItemByUserIdAndItemId(1, 1));
@@ -199,7 +178,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void findItemByUserIdAndItemId_ItemNotFound() {
+    void findItemByUserIdAndItemIdItemNotFound() {
         when(userRepository.findById(2)).thenReturn(Optional.of(userForTest));
         when(itemRepository.findById(1)).thenReturn(Optional.empty());
 
@@ -211,7 +190,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void delete_WhenUserIsAuthorized_ShouldDeleteItem() {
+    void deleteWhenUserIsAuthorizedShouldDeleteItem() {
         Integer itemId = 1;
         Integer userId = 2;
 
@@ -223,7 +202,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void delete_WhenUserIsNotAuthorized_ShouldThrowException() {
+    void deleteWhenUserIsNotAuthorizedShouldThrowException() {
         Integer itemId = 1;
         Integer userId = 1;
 
@@ -234,7 +213,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void delete_WhenItemNotFound_ShouldThrowException() {
+    void deleteWhenItemNotFoundShouldThrowException() {
         Integer itemId = 1;
         Integer userId = 1;
 

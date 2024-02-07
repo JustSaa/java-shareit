@@ -63,6 +63,15 @@ public class ErrorHandlerTests {
     }
 
     @Test
+    public void testInvalidStatusExceptionEmpty() {
+        InvalidStatusException invalidStatusException = new InvalidStatusException();
+
+        ErrorResponse errorResponse = errorHandler.invalidStatusException(invalidStatusException);
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorResponse.getStatus());
+    }
+
+    @Test
     public void testUnavailableItemException() {
         UnavailableItemException unavailableItemException = new UnavailableItemException(1);
 

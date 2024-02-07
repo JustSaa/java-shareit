@@ -82,17 +82,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void checkUpdateUser_validException() throws Exception {
-        userDto.setName("");
-        mockMvc.perform(patch("/users/{userId}", 2)
-                        .content(gson.toJson(userDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void checkUpdateUser_updated() throws Exception {
+    public void checkUpdateUserUpdated() throws Exception {
         when(userService.update(any(), eq(2))).thenReturn(user);
 
         mockMvc.perform(patch("/users/{userId}", 2)

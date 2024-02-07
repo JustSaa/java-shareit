@@ -49,7 +49,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void checkUpdateUser_notFound() {
+    public void checkUpdateUserNotFound() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
         final var thrown = assertThrows(NotFoundException.class,
@@ -61,7 +61,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void checkUpdateUser_updated() {
+    public void checkUpdateUserUpdated() {
         User userAfterUpdate = makeUser(1, "Николай", "nick@ya.ru");
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
@@ -78,7 +78,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void checkGetUser_notFound() {
+    public void checkGetUserNotFound() {
         when(userRepository.findById(any())).thenReturn(Optional.empty());
 
         final var thrown = assertThrows(NotFoundException.class, () -> userService.findById(1));
@@ -89,7 +89,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void checkGetUser_found() {
+    public void checkGetUserFound() {
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
         User foundUser = userService.findById(user.getId());
@@ -111,7 +111,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testCreateUser_DuplicateEmail() {
+    public void testCreateUserDuplicateEmail() {
         User user = new User();
         user.setEmail("existing@example.com");
 
@@ -121,7 +121,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testCreateUser_UniqueEmail() {
+    public void testCreateUserUniqueEmail() {
         User user = new User();
         user.setEmail("existing@example.com");
 

@@ -31,7 +31,7 @@ public class BookingServiceIntegrationTest {
     private BookingService bookingService;
 
     @Test
-    public void checkGetBookingRequestsByUserId_all() {
+    public void checkGetBookingRequestsByUserIdAll() {
         List<BookingResponseDto> bookings = bookingService.getBookingRequestsByUserId(1, "ALL", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -43,7 +43,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingRequestsByUserId_past() {
+    public void checkGetBookingRequestsByUserIdPast() {
         List<BookingResponseDto> bookings = bookingService.getBookingRequestsByUserId(1, "PAST", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -53,7 +53,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingRequestsByUserId_current() {
+    public void checkGetBookingRequestsByUserIdCurrent() {
         List<BookingResponseDto> bookings = bookingService.getBookingRequestsByUserId(1, "CURRENT", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -62,7 +62,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingRequestsByUserId_future() {
+    public void checkGetBookingRequestsByUserIdFuture() {
         List<BookingResponseDto> bookings = bookingService.getBookingRequestsByUserId(1, "FUTURE", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -72,7 +72,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingRequestsByUserId_waiting() {
+    public void checkGetBookingRequestsByUserIdWaiting() {
         List<BookingResponseDto> bookings = bookingService.getBookingRequestsByUserId(3, "WAITING", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -81,7 +81,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingRequestsByUserId_rejected() {
+    public void checkGetBookingRequestsByUserIdRejected() {
         List<BookingResponseDto> bookings = bookingService.getBookingRequestsByUserId(1, "REJECTED", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -90,7 +90,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingsByOwnerId_all() {
+    public void checkGetBookingsByOwnerIdAll() {
         List<BookingResponseDto> bookings = bookingService.getBookingsByOwnerId(3, "ALL", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -103,7 +103,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingsByOwnerId_current() {
+    public void checkGetBookingsByOwnerIdCurrent() {
         List<BookingResponseDto> bookings = bookingService.getBookingsByOwnerId(3, "CURRENT", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -113,7 +113,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingsByOwnerId_future() {
+    public void checkGetBookingsByOwnerIdFuture() {
         List<BookingResponseDto> bookings = bookingService.getBookingsByOwnerId(3, "FUTURE", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -122,7 +122,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingsByOwnerId_past() {
+    public void checkGetBookingsByOwnerIdPast() {
         List<BookingResponseDto> bookings = bookingService.getBookingsByOwnerId(3, "PAST", 0, 5);
 
         assertThat(bookings, notNullValue());
@@ -132,7 +132,7 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkGetBookingsByOwnerId_rejected() {
+    public void checkGetBookingsByOwnerIdRejected() {
         List<BookingResponseDto> bookings = bookingService.getBookingsByOwnerId(3, "REJECTED", 0, 5);
 
         assertThat(bookings, notNullValue());

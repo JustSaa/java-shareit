@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.mapper;
 
-import lombok.experimental.UtilityClass;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
@@ -13,71 +15,43 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-@UtilityClass
-public class ItemMapper {
-    public ItemDto toItemDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .requestId(item.getItemRequest() == null ? null : item.getItemRequest().getId())
-                .build();
-    }
+@Mapper(imports = {LocalDateTime.class, UUID.class})
+public interface ItemMapper {
+    ItemMapper INSTANCE = Mappers.getMapper(ItemMapper.class);
 
-    public Item toItem(ItemDto itemDto, User owner, ItemRequest itemRequest) {
-        return Item.builder()
-                .id(itemDto.getId())
-                .name(itemDto.getName())
-                .description((itemDto.getDescription()))
-                .available(itemDto.getAvailable())
-                .owner(owner)
-                .itemRequest(itemRequest)
-                .comments(Collections.emptyList())
-                .build();
+    @Mapping(target = "id", source = "item.id")
+    @Mapping(target = "requestId", expression = "java(getRequestIdFromItem(item))")
+    ItemDto toItemDto(Item item);
 
-    }
+    @Mapping(target = "id", source = "itemDto.id")
+    @Mapping(target = "name", source = "itemDto.name")
+    @Mapping(target = "description", source = "itemDto.description")
+    @Mapping(target = "comments", ignore = true)
+    @Mapping(target = "owner", source = "owner")
+    @Mapping(target = "itemRequest", source = "itemRequest")
+    Item toItem(ItemDto itemDto, User owner, ItemRequest itemRequest);
 
-    public ItemResponseDto toItemResponseDto(Item item,
-                                             Booking lastBooking,
-                                             Booking nextBooking) {
-        return ItemResponseDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .lastBooking(getBookingDtoIfExist(lastBooking))
-                .nextBooking(getBookingDtoIfExist(nextBooking))
-                .comments(item.getComments().stream()
-                        .map(ItemMapper::toCommentResponseDto)
-                        .collect(Collectors.toList()))
-                .requestId(item.getItemRequest() == null ? null : item.getItemRequest().getId())
-                .build();
-    }
+    @Mapping(target = "lastBooking", expression = "java(getBookingDtoIfExist(lastBooking))")
+    @Mapping(target = "nextBooking", expression = "java(getBookingDtoIfExist(nextBooking))")
+    @Mapping(target = "requestId", expression = "java(getRequestIdFromItem(item))")
+    @Mapping(target = "comments", expression = "java(getCommentsList(item))")
+    @Mapping(target = "id", source = "item.id")
+    ItemResponseDto toItemResponseDto(Item item, Booking lastBooking, Booking nextBooking);
 
-    public Comment toComment(CommentCreateDto commentCreateDto, User author, Item item) {
-        return Comment.builder()
-                .text(commentCreateDto.getText())
-                .item(item)
-                .author(author)
-                .created(LocalDateTime.now())
-                .build();
-    }
+    @Mapping(target = "created", expression = "java(LocalDateTime.now())")
+    @Mapping(target = "id", constant = "0L")
+    Comment toComment(CommentCreateDto commentCreateDto, User author, Item item);
 
-    public CommentResponseDto toCommentResponseDto(Comment comment) {
-        return CommentResponseDto.builder()
-                .id(comment.getId())
-                .text(comment.getText())
-                .itemName(comment.getItem().getName())
-                .authorName(comment.getAuthor().getName())
-                .created(comment.getCreated())
-                .build();
-    }
+    @Mapping(target = "itemName", source = "comment.item.name")
+    @Mapping(target = "authorName", source = "comment.author.name")
+    @Mapping(target = "created", source = "comment.created")
+    CommentResponseDto toCommentResponseDto(Comment comment);
 
-    private BookingDto getBookingDtoIfExist(Booking booking) {
+    default BookingDto getBookingDtoIfExist(Booking booking) {
         return booking == null
                 ? null
                 : BookingDto.builder()
@@ -86,5 +60,15 @@ public class ItemMapper {
                 .end(booking.getEnd())
                 .bookerId(booking.getBooker().getId())
                 .build();
+    }
+
+    default Integer getRequestIdFromItem(Item item) {
+        return item.getItemRequest() == null ? null : item.getItemRequest().getId();
+    }
+
+    default List<CommentResponseDto> getCommentsList(Item item) {
+        return item.getComments().stream()
+                .map(ItemMapper.INSTANCE::toCommentResponseDto)
+                .collect(Collectors.toList());
     }
 }

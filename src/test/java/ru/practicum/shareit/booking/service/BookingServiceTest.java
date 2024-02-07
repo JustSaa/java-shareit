@@ -23,10 +23,10 @@ import ru.practicum.shareit.user.service.UserService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static datas.ObjectMaker.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static datas.ObjectMaker.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceTest {
@@ -74,7 +74,7 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkSaveBooking_unavailableItemException() {
+    public void checkSaveBookingUnavailableItemException() {
         item.setAvailable(false);
         when(itemRepository.findById(1)).thenReturn(Optional.ofNullable(item));
         when(userService.findById(booker.getId())).thenReturn(booker);
@@ -87,7 +87,7 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkSaveBooking_NotFoundItem() {
+    public void checkSaveBookingNotFoundItem() {
         final var thrown = assertThrows(NotFoundException.class,
                 () -> bookingService.saveBooking(bookingDtoWithoutId, booker.getId()));
 
@@ -112,7 +112,7 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkApproveBooking_NotFoundBooking() {
+    public void checkApproveBookingNotFoundBooking() {
         Integer bookingId = 123;
         Boolean isApproved = true;
         Integer ownerId = 1;
@@ -125,7 +125,7 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkApproveBooking_accessException() {
+    public void checkApproveBookingAccessException() {
         when(bookingRepository.findById(booking.getId()))
                 .thenReturn(Optional.of(booking));
 
@@ -139,9 +139,9 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkApproveBooking_invalidStatusException() {
+    public void checkApproveBookingInvalidStatusException() {
         int ownerId = 1;
-        String invalidState = "INVALID_STATE";
+        String invalidState = "INVALID STATE";
         int from = 0;
         int size = 10;
 
@@ -151,9 +151,9 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkApproveBooking_invalidStatusExceptionUserId() {
+    public void checkApproveBookingInvalidStatusExceptionUserId() {
         int ownerId = 1;
-        String invalidState = "INVALID_STATE";
+        String invalidState = "INVALID STATE";
         int from = 0;
         int size = 10;
 
@@ -163,7 +163,7 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkApproveBooking_alreadyApprovedException() {
+    public void checkApproveBookingAlreadyApprovedException() {
         item.setOwner(booker);
         booking.setStatus(BookingStatus.APPROVED);
         when(bookingRepository.findById(booking.getId()))
@@ -191,7 +191,7 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkGetBookingById_noAccessException() {
+    public void checkGetBookingByIdNoAccessException() {
         Integer alienId = 3;
         when(bookingRepository.findById(booking.getId()))
                 .thenReturn(Optional.of(booking));
@@ -205,7 +205,7 @@ class BookingServiceTest {
     }
 
     @Test
-    public void checkGetBookingById_notFoundException() {
+    public void checkGetBookingByIdNotFoundException() {
         when(bookingRepository.findById(any())).thenReturn(Optional.empty());
 
         final var thrown = assertThrows(NotFoundException.class,
@@ -217,7 +217,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void getBookingsByOwnerId_userNotFound_throwsNotFoundException() {
+    void getBookingsByOwnerIdNotFoundException() {
         int ownerId = 1;
         String state = "ALL";
         int from = 0;

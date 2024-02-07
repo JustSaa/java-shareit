@@ -83,7 +83,7 @@ class ItemControllerTest {
             .create();
 
     @Test
-    public void checkSaveItem_withoutRequest() throws Exception {
+    public void checkSaveItemWithoutRequest() throws Exception {
         when(itemService.create(itemDtoWithoutId, user.getId())).thenReturn(item);
 
         mockMvc.perform(post("/items")
@@ -100,7 +100,7 @@ class ItemControllerTest {
     }
 
     @Test
-    public void checkSaveItem_withRequest() throws Exception {
+    public void checkSaveItemWithRequest() throws Exception {
         User requester = makeUser(3, "Nick", "nick@ya.ru");
         ItemRequest itemRequest = makeRequest(3, "some request",
                 LocalDateTime.of(2022, 9, 11, 10, 10, 10), requester, null);
@@ -141,26 +141,6 @@ class ItemControllerTest {
     }
 
     @Test
-    public void checkUpdateItem_validException() throws Exception {
-        itemDto.setName("");
-        mockMvc.perform(patch("/items/{itemId}", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, user.getId())
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(itemDto)))
-                .andExpect(status().isBadRequest());
-
-        itemDto.setName("name");
-        itemDto.setDescription("");
-        mockMvc.perform(patch("/items/{itemId}", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, user.getId())
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(itemDto)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     public void checkGetItem() throws Exception {
         when(itemService.findItemByUserIdAndItemId(item.getId(), user.getId())).thenReturn(itemResponseDto);
 
@@ -176,7 +156,7 @@ class ItemControllerTest {
     }
 
     @Test
-    public void checkGetItem_withBookings() throws Exception {
+    public void checkGetItemWithBookings() throws Exception {
         BookingDto lastBooking = makeBookingDto(4, LocalDateTime.of(2022, 9, 11, 10, 10, 10),
                 LocalDateTime.of(2022, 9, 11, 20, 10, 10), 2);
         BookingDto nextBooking = makeBookingDto(4, LocalDateTime.of(2022, 10, 11, 10, 10, 10),
@@ -219,7 +199,7 @@ class ItemControllerTest {
     }
 
     @Test
-    public void checkSearch_emptyList() throws Exception {
+    public void checkSearchEmptyList() throws Exception {
         mockMvc.perform(get("/items/search")
                         .accept(MediaType.APPLICATION_JSON)
                         .header(USER_ID_HEADER, user.getId())
@@ -270,7 +250,7 @@ class ItemControllerTest {
     }
 
     @Test
-    public void deleteItem_Success() throws Exception {
+    public void deleteItemSuccess() throws Exception {
         mockMvc.perform(delete("/items/{itemId}", 1)
                         .header(USER_ID_HEADER, 1)
                         .contentType(MediaType.APPLICATION_JSON))

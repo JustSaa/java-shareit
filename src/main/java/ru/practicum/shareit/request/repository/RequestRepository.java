@@ -12,7 +12,7 @@ import java.util.List;
 public interface RequestRepository extends JpaRepository<ItemRequest, Integer> {
     List<ItemRequest> findAllByRequesterOrderByCreatedDesc(User requester);
 
-    @Query("SELECT r FROM ItemRequest AS r WHERE r.requester.id <> ?1 " +
+    @Query("SELECT r FROM ItemRequest AS r WHERE r.requester.id <> :requesterId " +
             "ORDER BY r.created DESC")
     Page<ItemRequest> findAllAlien(Integer requesterId, Pageable pageable);
 }

@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.constants.Constants;
@@ -29,40 +30,44 @@ public class ItemRequestController {
     private final UserService userService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ItemRequestResponseDto saveRequest(@RequestHeader(Constants.SHARER_USER_ID) Integer userId,
                                               @Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
         log.debug("Получен POST запрос к эндпоинту: '/requests', Строка параметра запроса для userId={} body: {}", userId, itemRequestCreateDto);
-        return RequestMapper.toRequestDto(requestService.saveRequest(userId, itemRequestCreateDto));
+        return RequestMapper.INSTANCE.toRequestDto(requestService.saveRequest(userId, itemRequestCreateDto));
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<ItemRequestResponseDto> getMyRequests(@RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
         log.debug("Получен GET запрос к эндпоинту: '/requests', Строка параметра запроса для userId={}", userId);
         User requester = userService.findById(userId);
         return requestService.getAllByRequester(userId).stream()
-                .map(RequestMapper::toRequestDto)
+                .map(RequestMapper.INSTANCE::toRequestDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
     public List<ItemRequestResponseDto> getAlienRequests(@RequestHeader(Constants.SHARER_USER_ID) Integer userId,
                                                          @PositiveOrZero
                                                          @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT)
-                                                         int from,
+                                                         Integer from,
                                                          @Positive
                                                          @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT)
-                                                         int size) {
+                                                             Integer size) {
         log.debug("Получен GET запрос к эндпоинту: '/requests/all', Строка параметра запроса для userId={} from={} size={}", userId, from, size);
         return requestService.getAllAlien(userId, from, size).stream()
-                .map(RequestMapper::toRequestDto)
+                .map(RequestMapper.INSTANCE::toRequestDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{requestId}")
+    @ResponseStatus(HttpStatus.OK)
     public ItemRequestResponseDto getRequestById(@RequestHeader(Constants.SHARER_USER_ID) Integer userId,
                                                  @PathVariable("requestId") Integer requestId) {
         log.debug("Получен GET запрос к эндпоинту: '/requests/{}', Строка параметра запроса для userId={}", requestId, userId);
         userService.findById(userId);
-        return RequestMapper.toRequestDto(requestService.getRequestById(requestId));
+        return RequestMapper.INSTANCE.toRequestDto(requestService.getRequestById(requestId));
     }
 }
