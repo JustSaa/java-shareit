@@ -13,7 +13,7 @@ import ru.practicum.shareit.user.model.User;
 public interface BookingMapper {
     BookingMapper INSTANCE = Mappers.getMapper(BookingMapper.class);
 
-    @Mapping(source = "item" , target = "item")
+    @Mapping(source = "item", target = "item")
     @Mapping(target = "id", source = "bookingCreateDto.id")
     @Mapping(source = "user", target = "booker")
     @Mapping(target = "status", constant = "WAITING")
