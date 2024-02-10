@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,14 +31,12 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Transactional
     @Override
     public User findById(Integer userId) {
         userExistenceCheck(userId);
         return userRepository.findById(userId).get();
     }
 
-    @Transactional
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
@@ -49,13 +48,16 @@ public class UserServiceImpl implements UserService {
         log.debug("Update User: {}, userId: {}", user, userId);
         userExistenceCheck(userId);
         User userToUpdate = userRepository.findById(userId).get();
-        if (user.getEmail() != null && !user.getEmail().equals(userToUpdate.getEmail()) && !user.getEmail().isBlank()) {
-            validationEmail(user);
-            userToUpdate.setEmail(user.getEmail());
-        }
-        if (user.getName() != null && !user.getName().isBlank()) {
-            userToUpdate.setName(user.getName());
-        }
+        Optional.ofNullable(user.getEmail())
+                .filter(email -> !email.equals(userToUpdate.getEmail()) && !email.isBlank())
+                .ifPresent(email -> {
+                    validationEmail(user);
+                    userToUpdate.setEmail(email);
+                });
+        Optional.ofNullable(user.getName())
+                .filter(name -> !name.isBlank())
+                .ifPresent(userToUpdate::setName);
+
         return userToUpdate;
     }
 
@@ -71,7 +73,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void validationEmail(User user) {
+    public void validationEmail(User user) {
         String userEmail = user.getEmail();
 
         boolean isEmailValid = userRepository.findAll().stream()

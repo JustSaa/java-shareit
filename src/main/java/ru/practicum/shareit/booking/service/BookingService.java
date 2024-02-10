@@ -6,7 +6,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface BookingService {
     BookingResponseDto saveBooking(BookingCreateDto bookingCreateDto, Integer userId);
@@ -15,11 +14,11 @@ public interface BookingService {
 
     BookingResponseDto getBookingById(Integer bookingId, Integer userId);
 
-    List<BookingResponseDto> getBookingRequestsByUserId(Integer userId, String state);
+    List<BookingResponseDto> getBookingRequestsByUserId(Integer userId, String state, int from, int size);
 
-    List<BookingResponseDto> getBookingsByOwnerId(Integer ownerId, String state);
+    List<BookingResponseDto> getBookingsByOwnerId(Integer ownerId, String state, int from, int size);
 
-    Optional<Booking> getLastBookingByItem(Item item);
+    Booking getLastBookingByItem(Item item);
 
-    Optional<Booking> getNextBookingByItem(Item item);
+    Booking getNextBookingByItem(Item item);
 }

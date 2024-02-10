@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.Comment;
@@ -19,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "users")
+@Builder(toBuilder = true)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

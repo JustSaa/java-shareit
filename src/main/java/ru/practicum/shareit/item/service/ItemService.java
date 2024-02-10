@@ -9,17 +9,15 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.List;
 
 public interface ItemService {
-    Item create(Item item, Integer userId);
+    Item create(ItemDto item, Integer userId);
 
-    Item update(Item item, Integer userId, Integer itemId);
+    Item update(ItemDto item, Integer userId, Integer itemId);
 
-    Item findByItemId(Integer itemId);
-
-    List<ItemResponseDto> findAllItems(Integer userId);
+    List<ItemResponseDto> findAllItems(Integer userId, int from, int size);
 
     void delete(Integer itemId, Integer userId);
 
-    List<ItemDto> searchItem(Integer userId, String text);
+    List<ItemDto> searchItem(Integer userId, String text, int from, int size);
 
     ItemResponseDto findItemByUserIdAndItemId(Integer itemId, Integer userId);
 

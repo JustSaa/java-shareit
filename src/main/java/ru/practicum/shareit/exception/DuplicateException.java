@@ -5,9 +5,5 @@ public class DuplicateException extends RuntimeException {
         this.message = message;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
     private final String message;
 }

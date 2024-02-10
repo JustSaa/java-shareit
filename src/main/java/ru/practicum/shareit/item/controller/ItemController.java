@@ -8,11 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.constants.Constants;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.controller.Create;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -26,9 +27,13 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponseDto> findAllItems(@RequestHeader(Constants.SHARER_USER_ID) Integer userId) {
+    public List<ItemResponseDto> findAllItems(@RequestHeader(Constants.SHARER_USER_ID) Integer userId,
+                                              @PositiveOrZero
+                                              @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT) Integer from,
+                                              @Positive
+                                              @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT) Integer size) {
         log.info("Получен GET запрос к эндпоинту: '/items', Строка параметра запроса для userId: {}", userId);
-        return itemService.findAllItems(userId);
+        return itemService.findAllItems(userId, from, size);
     }
 
     @GetMapping("/{itemId}")
@@ -43,25 +48,29 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto create(@RequestHeader(Constants.SHARER_USER_ID) Integer userId,
-                          @Validated(Create.class) @RequestBody Item item) {
+                          @Validated(Create.class) @RequestBody ItemDto item) {
         log.info("Получен POST запрос к эндпоинту: '/items', Строка параметров запроса: {}", item.toString());
-        return ItemMapper.toItemDto(itemService.create(item, userId));
+        return ItemMapper.INSTANCE.toItemDto(itemService.create(item, userId));
     }
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     public ItemDto update(@RequestHeader(Constants.SHARER_USER_ID) Integer userId,
-                          @RequestBody Item item, @PathVariable Integer itemId) {
+                          @RequestBody ItemDto item, @PathVariable Integer itemId) {
         log.info("Получен PATCH запрос к эндпоинту: '/items', Строка параметров запроса: {}", item.toString());
-        return ItemMapper.toItemDto(itemService.update(item, userId, itemId));
+        return ItemMapper.INSTANCE.toItemDto(itemService.update(item, userId, itemId));
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public List<ItemDto> searchItem(@RequestHeader(Constants.SHARER_USER_ID) Integer userId,
-                                    @RequestParam(name = "text") String text) {
+                                    @RequestParam(name = "text", defaultValue = "") String text,
+                                    @PositiveOrZero
+                                    @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT) Integer from,
+                                    @Positive
+                                    @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT) Integer size) {
         log.info("Получен GET запрос к эндпоинту: '/search', Строка параметров поиска: {}", text);
-        return itemService.searchItem(userId, text);
+        return itemService.searchItem(userId, text, from, size);
     }
 
     @DeleteMapping("/{itemId}")
@@ -81,6 +90,6 @@ public class ItemController {
         log.info("Получен POST запрос к эндпоинту: '/items/{}/comment', " +
                         "Строка параметров запроса: userId={}, Comment={}",
                 itemId, userId, commentCreateDto);
-        return ItemMapper.toCommentReturnDto(itemService.saveComment(itemId, commentCreateDto, userId));
+        return ItemMapper.INSTANCE.toCommentResponseDto(itemService.saveComment(itemId, commentCreateDto, userId));
     }
 }

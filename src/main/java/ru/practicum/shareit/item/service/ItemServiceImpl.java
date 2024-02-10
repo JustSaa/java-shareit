@@ -2,10 +2,12 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.custom.CustomPageRequest;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedException;
 import ru.practicum.shareit.exception.UnavailableItemException;
@@ -17,6 +19,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.RequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -35,85 +39,75 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingService bookingService;
     private final CommentRepository commentRepository;
+    private final RequestService requestService;
 
     @Transactional
     @Override
-    public Item create(Item item, Integer userId) {
+    public Item create(ItemDto item, Integer userId) {
         log.debug("Create ItemDB: {}, userId: {}", item, userId);
         userExistenceCheck(userId);
         User user = userRepository.findById(userId).get();
-        item.setOwner(user);
-        return itemRepository.save(item);
+        ItemRequest itemRequest = Optional.ofNullable(item.getRequestId())
+                .map(requestService::getRequestById)
+                .orElse(null);
+        Item itemToDB = ItemMapper.INSTANCE.toItem(item, user, itemRequest);
+        return itemRepository.save(itemToDB);
     }
 
     @Transactional
     @Override
-    public Item update(Item item, Integer userId, Integer itemId) {
+    public Item update(ItemDto item, Integer userId, Integer itemId) {
         log.debug("Update ItemDB: {}, userId: {}, itemId: {}", item, userId, itemId);
         userExistenceCheck(userId);
-        Optional<Item> existingItem = itemRepository.findById(itemId);
-        if (existingItem.isEmpty()) {
-            throw new NotFoundException("Предмет с id:" + itemId + " не найден");
-        }
-
-        Item updatedItem = existingItem.get();
-        userAuthorizedCheck(updatedItem, userId);
-        updateFields(item, updatedItem);
-        return updatedItem;
+        Item existingItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет с id:" + itemId + " не найден"));
+        item.setId(itemId);
+        User owner = userRepository.findById(userId).get();
+        Item itemToDB = ItemMapper.INSTANCE.toItem(item, owner, null);
+        userAuthorizedCheck(itemToDB, userId);
+        updateFields(itemToDB, existingItem);
+        return existingItem;
     }
 
-    @Transactional
     @Override
-    public Item findByItemId(Integer itemId) {
-        Optional<Item> item = itemRepository.findById(itemId);
-        if (item.isEmpty()) {
-            throw new NotFoundException("Нет вещи с id = " + itemId);
-        }
-        return item.get();
-    }
-
-    @Transactional
-    @Override
-    public List<ItemResponseDto> findAllItems(Integer userId) {
+    public List<ItemResponseDto> findAllItems(Integer userId, int from, int size) {
         userExistenceCheck(userId);
-        return itemRepository.getAllByOwnerIdOrderById(userId).stream()
-                .map(item -> ItemMapper.toItemReturnDto(item,
+        Pageable pageRequest = new CustomPageRequest(from, size);
+        List<Item> items = itemRepository.getAllByOwnerIdOrderById(userId, pageRequest).getContent();
+        return items.stream()
+                .map(item -> ItemMapper.INSTANCE.toItemResponseDto(item,
                         bookingService.getLastBookingByItem(item),
                         bookingService.getNextBookingByItem(item)))
                 .collect(Collectors.toList());
     }
 
-    @Transactional
     @Override
     public ItemResponseDto findItemByUserIdAndItemId(Integer itemId, Integer userId) {
         userExistenceCheck(userId);
-        Item item = findByItemId(itemId);
-        if (item.getOwner().getId().equals(userId)) {
-            return ItemMapper.toItemReturnDto(item,
-                    bookingService.getLastBookingByItem(item),
-                    bookingService.getNextBookingByItem(item));
-        } else {
-            return ItemMapper.toItemReturnDto(item,
-                    Optional.empty(),
-                    Optional.empty());
-        }
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Нет вещи с id = " + itemId));
+        return ItemMapper.INSTANCE.toItemResponseDto(item,
+                item.getOwner().getId().equals(userId) ? bookingService.getLastBookingByItem(item) : null,
+                item.getOwner().getId().equals(userId) ? bookingService.getNextBookingByItem(item) : null);
     }
 
     @Transactional
     @Override
     public void delete(Integer itemId, Integer userId) {
-        userAuthorizedCheck(findByItemId(itemId), userId);
+        userAuthorizedCheck(itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Нет вещи с id = " + itemId)), userId);
         itemRepository.deleteById(itemId);
     }
 
-    @Transactional
-    public List<ItemDto> searchItem(Integer userId, String text) {
+    public List<ItemDto> searchItem(Integer userId, String text, int from, int size) {
         userExistenceCheck(userId);
+        Pageable pageRequest = new CustomPageRequest(from, size);
+        List<Item> items = itemRepository.getAllByTemplate(text, pageRequest).getContent();
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.getAllByTemplate(text).stream()
-                .map(ItemMapper::toItemDto)
+        return items.stream()
+                .map(ItemMapper.INSTANCE::toItemDto)
                 .collect(Collectors.toList());
     }
 
@@ -131,18 +125,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void updateFields(Item item, Item itemToUpdate) {
+        Optional.ofNullable(item.getName())
+                .filter(name -> !name.isBlank())
+                .ifPresent(itemToUpdate::setName);
 
-        if (item.getName() != null && !item.getName().isBlank()) {
-            itemToUpdate.setName(item.getName());
-        }
+        Optional.ofNullable(item.getDescription())
+                .filter(description -> !description.isBlank())
+                .ifPresent(itemToUpdate::setDescription);
 
-        if (item.getDescription() != null && !item.getDescription().isBlank()) {
-            itemToUpdate.setDescription(item.getDescription());
-        }
-
-        if (item.getAvailable() != null) {
-            itemToUpdate.setAvailable(item.getAvailable());
-        }
+        Optional.ofNullable(item.getAvailable())
+                .ifPresent(itemToUpdate::setAvailable);
     }
 
     @Transactional
@@ -151,8 +143,9 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Create Comment: {}, itemId: {}, userId: {}", commentCreateDto, itemId, userId);
         userExistenceCheck(userId);
         User author = userRepository.findById(userId).get();
-        Item item = findByItemId(itemId);
-        Comment comment = ItemMapper.toComment(commentCreateDto, author, item);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Нет вещи с id = " + itemId));
+        Comment comment = ItemMapper.INSTANCE.toComment(commentCreateDto, author, item);
         List<Booking> userBookings = bookingRepository.findAllPastByBooker(comment.getAuthor());
         boolean doesAuthorRentThisItem = userBookings.stream().anyMatch(booking ->
                 booking.getItem().getId().equals(comment.getItem().getId()));
