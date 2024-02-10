@@ -21,7 +21,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareitDB
       - POSTGRES_USER=shareitAdmin
       - POSTGRES_PASSWORD=root
-      - TZ=Europe/Moscow
+
 
   db:
     image: postgres:13.7-alpine
