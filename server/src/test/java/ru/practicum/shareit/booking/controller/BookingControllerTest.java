@@ -91,21 +91,6 @@ public class BookingControllerTest {
         verifyNoMoreInteractions(bookingService);
     }
 
-//    @Test
-//    public void checkSaveBookingDurationException() throws Exception {
-//        bookingCreateDto.setEnd(LocalDateTime.of(2021, 10, 11, 10, 10, 10));
-//        mockMvc.perform(post("/bookings")
-//                        .content(gson.toJson(bookingCreateDto))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .header(USER_ID_HEADER, booker.getId())
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isBadRequest());
-//
-//        verifyNoInteractions(itemService);
-//        verifyNoInteractions(userService);
-//        verifyNoInteractions(bookingService);
-//    }
-
     @Test
     public void testGetMyBookings() throws Exception {
         int userId = 1;

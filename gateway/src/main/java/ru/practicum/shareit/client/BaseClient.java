@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import static ru.practicum.shareit.constants.Constants.SHARER_USER_ID;
 
 public class BaseClient {
-    protected final RestTemplate rest;
+    private final RestTemplate rest;
 
     public BaseClient(RestTemplate rest) {
         this.rest = rest;

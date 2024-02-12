@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,7 @@ public class BookingController {
     private final BookingClient bookingClient;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> saveBooking(@Valid @RequestBody BookingCreateDto bookingCreateDto,
                                               @RequestHeader(SHARER_USER_ID) Integer userId) {
         validateBookingDuration(bookingCreateDto.getStart(), bookingCreateDto.getEnd());
@@ -34,6 +36,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> approveBooking(@PathVariable("bookingId") Integer bookingId,
                                                  @RequestParam("approved") Boolean approved,
                                                  @RequestHeader(SHARER_USER_ID) Integer userId) {
@@ -42,6 +45,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getBooking(@PathVariable("bookingId") Integer bookingId,
                                              @RequestHeader(SHARER_USER_ID) Integer userId) {
         log.debug("Get booking {}: userId={}}", bookingId, userId);
@@ -49,6 +53,7 @@ public class BookingController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getMyBookingRequests(@RequestParam(name = "state", defaultValue = STATE_DEFAULT)
                                                        String state,
                                                        @RequestHeader(SHARER_USER_ID) Integer userId,
@@ -64,6 +69,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getMyBookings(@RequestParam(name = "state", defaultValue = STATE_DEFAULT)
                                                 String state,
                                                 @RequestHeader(SHARER_USER_ID) Integer userId,

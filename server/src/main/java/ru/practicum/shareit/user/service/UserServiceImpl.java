@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public void validationEmail(User user) {
+    private void validationEmail(User user) {
         String userEmail = user.getEmail();
 
         boolean isEmailValid = userRepository.findAll().stream()

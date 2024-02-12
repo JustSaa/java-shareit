@@ -111,16 +111,6 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testCreateUserDuplicateEmail() {
-        User user = new User();
-        user.setEmail("existing@example.com");
-
-        when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
-
-        assertThrows(DuplicateException.class, () -> userService.validationEmail(user));
-    }
-
-    @Test
     public void testCreateUserUniqueEmail() {
         User user = new User();
         user.setEmail("existing@example.com");

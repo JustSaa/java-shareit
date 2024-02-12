@@ -48,7 +48,7 @@ public class ItemRequestController {
                                                          @RequestParam(name = "from", defaultValue = Constants.FROM_DEFAULT)
                                                          Integer from,
                                                          @RequestParam(name = "size", defaultValue = Constants.SIZE_DEFAULT)
-                                                             Integer size) {
+                                                         Integer size) {
         log.debug("Получен GET запрос к эндпоинту: '/requests/all', Строка параметра запроса для userId={} from={} size={}", userId, from, size);
         return requestService.getAllAlien(userId, from, size).stream()
                 .map(RequestMapper.INSTANCE::toRequestDto)

@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +21,14 @@ public class UserController {
     private final UserClient userClient;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> saveUser(@Validated({Create.class}) @RequestBody UserDto userDto) {
         log.debug("Creating user: {}", userDto);
         return userClient.saveUser(userDto);
     }
 
     @PatchMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> updateUser(@PathVariable("userId") Integer userId,
                                              @Validated({Update.class}) @RequestBody UserDto userDto) {
         validate(userDto);
@@ -35,18 +38,21 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public void deleteUser(@PathVariable("userId") Integer userId) {
         log.debug("Deleting user {}", userId);
         userClient.deleteUser(userId);
     }
 
     @GetMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getUser(@PathVariable("userId") Integer userId) {
         log.debug("Get user {}", userId);
         return userClient.getUser(userId);
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getAll() {
         log.debug("Get all users");
         return userClient.getAll();

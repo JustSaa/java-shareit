@@ -15,7 +15,13 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<name>ShareIt</name>
-
+	<dependencies>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.5.5.Final</version>
+		</dependency>
+	</dependencies>
 	<properties>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>

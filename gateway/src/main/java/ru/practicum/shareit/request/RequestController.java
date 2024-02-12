@@ -2,6 +2,7 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class RequestController {
     private final RequestClient requestClient;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> saveRequest(@RequestHeader(SHARER_USER_ID) Integer userId,
                                               @Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
         log.debug("Creating itemRequest: userId={}, body: {}", userId, itemRequestCreateDto);
@@ -29,12 +31,14 @@ public class RequestController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getMyRequests(@RequestHeader(SHARER_USER_ID) Integer userId) {
         log.debug("Get requests that user {} made", userId);
         return requestClient.getMyRequests(userId);
     }
 
     @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getAlienRequests(@RequestHeader(SHARER_USER_ID) Integer userId,
                                                    @PositiveOrZero
                                                    @RequestParam(name = "from", defaultValue = FROM_DEFAULT)
@@ -47,6 +51,7 @@ public class RequestController {
     }
 
     @GetMapping("/{requestId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getRequestById(@RequestHeader(SHARER_USER_ID) Integer userId,
                                                  @PathVariable("requestId") Integer requestId) {
         log.debug("Get request {}: userId={}", requestId, userId);

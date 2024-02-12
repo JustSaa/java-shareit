@@ -28,6 +28,7 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> saveItem(@RequestHeader(SHARER_USER_ID) Integer userId,
                                            @Validated({Create.class}) @RequestBody ItemDto itemDto) {
         log.debug("Creating item: userId={}, body: {}", userId, itemDto);
@@ -35,6 +36,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> updateItem(@RequestHeader(SHARER_USER_ID) Integer userId,
                                              @PathVariable("itemId") Integer itemId,
                                              @Validated({Update.class}) @RequestBody ItemDto itemDto) {
@@ -44,6 +46,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getItem(@RequestHeader(SHARER_USER_ID) Integer userId,
                                           @PathVariable("itemId") Integer itemId) {
         log.debug("Get item {}: userId={}", itemId, userId);
@@ -51,6 +54,7 @@ public class ItemController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getMyItems(@RequestHeader(SHARER_USER_ID) Integer userId,
                                              @PositiveOrZero
                                              @RequestParam(name = "from", defaultValue = FROM_DEFAULT) Integer from,
@@ -61,6 +65,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> search(@RequestHeader(SHARER_USER_ID) Integer userId,
                                          @RequestParam(name = "text", defaultValue = "") String text,
                                          @PositiveOrZero
@@ -75,6 +80,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> saveComment(@PathVariable("itemId") Integer itemId,
                                               @Valid @RequestBody CommentCreateDto commentCreateDto,
                                               @RequestHeader(SHARER_USER_ID) Integer userId) {
